@@ -17,6 +17,7 @@
 #include <functional>
 #include <iostream>
 #include <fstream>
+#include <set>
 #include "FSTree.h"
 #include "DirNode.h"
 
@@ -48,7 +49,7 @@ class GerpIndexer {
 
         void indexFiles(std::string directory);
         void indexFile(std::string filePath);
-        void processLine();
+        set<string> processLine(const string& line)
         void insertWord();
         void rehash();
         int  hashWord(std::string word);

@@ -48,6 +48,19 @@ void GerpIndexer::indexFile(string filePath) {
     }
 }
 
+set<string> GerpIndexer::processLine(const string& line) {
+    stringstream ss(line);
+    string word;
+    set<string> words;
+
+    while (ss >> word) {
+        word.erase(std::remove_if(word.begin(), word.end(), ::ispunct), word.end());
+        words.insert(word);
+    }
+
+    return words;
+}
+
 int GerpIndexer::hashWord(string word) {
 
 }

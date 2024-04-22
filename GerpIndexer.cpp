@@ -48,8 +48,36 @@ void GerpIndexer::indexFile(string filePath) {
     }
 }
 
-int GerpIndexer::hashWord(string word) {
+void GerpIndexer::processLine(string line, set<string> &words) {
+    set<string> words; 
+    char seperator = ' ';
+}
 
+void GerpIndexer::insertWord(string word) {
+    elements++;
+    rehash();
+    Word newWord;
+    newWord.key = word;
+    newWord.value = hashWord(word);
+    hashTable[newWord.value];
+}
+
+void GerpIndexer::rehash() {
+    if (float(elements)/float(hashTable.capacity()) > 0.72) {
+        elements = 0;
+        size_t currCapacity = hashTable.capacity();
+        vector<Word> tempHashTable = hashTable;
+        hashTable.resize(currCapacity * 2);
+        for (int i = 0; i < tempHashTable.size(); i++) {
+            if (not tempHashTable[i].key.empty()) {
+                insertWord(tempHashTable[i].key);
+            }
+        }
+    }
+}
+
+int GerpIndexer::hashWord(string word) {
+    
 }
 
 /*
@@ -70,4 +98,48 @@ void GerpIndexer::getFileNames(DirNode *root, string path) {
 
     for (int i = 0; i < root->numSubDirs(); i++) 
         getFileNames(root->getSubDir(i), path);
+}
+
+/*
+ * name: isAlphaNum
+ * purpose: Determines if a character is AlphaNumeric
+ * arguments: A character that will be tested
+ * returns: True or false depending on if the character is AlphaNumeric
+ * effects: N/A
+ */
+bool GerpIndexer::isAlphaNum(char c) {
+    if ((48 <= int(c) and int(c) <= 57) or (65 <= int(c) and int(c) <= 90) 
+        or (97 <= int(c) and int(c) <= 122)) {
+        return true;
+    }
+    return false;
+}
+
+/*
+ * name: stripNonAlphaNum
+ * purpose: Remove non-alphanumeric characters from the beginning and end of a
+ *          string
+ * arguments: String to be stripped
+ * returns: A stripped string
+ * effects: N/A
+ */
+string GerpIndexer::stripNonAlphaNum(string input) {
+    int begin = 0;
+    int end = 0;
+
+    while (not isAlphaNum(input[begin]) && begin < int(input.length())) 
+        begin++;
+
+    input = input.erase(0, begin);
+
+    for (int i = 0; i < int(input.length()); i++) 
+        if (isAlphaNum(input[i])) 
+            end = i;
+
+    
+    if (input.length() > 0) 
+        input = input.erase(end + 1, input.length() - end); 
+    
+
+    return input;
 }

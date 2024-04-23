@@ -58,7 +58,8 @@ void GerpIndexer::processLine(const string& line, string currFilePath) {
 
     while (ss >> word) {
         word = stripNonAlphaNum(word);
-        words.insert(word);
+        if (not word.empty()) 
+            words.insert(word);
     }
 
     for (string w : words) {
@@ -90,7 +91,7 @@ void GerpIndexer::insertWord(string word, string currFilePath, bool insen) {
         insertWord(toLower(word), currFilePath, true);
 
     while (hashTable[value].key != "" and hashTable[value].key != word)
-        value = quadraticProbe(value, ++attempts);     
+        value = quadraticProbe(value, ++attempts);
 
     /* Case 1: Word is already on the hash table */
     if (hashTable[value].key == word) {
@@ -153,9 +154,11 @@ void GerpIndexer::insertNewLine(std::string currFile, int hash, bool insens) {
 
 void GerpIndexer::rehash() {
     if (float(elements)/float(hashTable.capacity()) > 0.72) {
+        cout << ++test << endl;
         vector<Word> tempHashTable = hashTable;
         primeIndex++;
-        vector<Word> newHashTable {size_t(prime[primeIndex])};
+        vector<Word> newHashTable;
+        newHashTable.resize(prime[primeIndex]);
         hashTable = newHashTable;
         for (size_t i = 0; i < tempHashTable.size(); i++) {
             if (not tempHashTable[i].key.empty()) {

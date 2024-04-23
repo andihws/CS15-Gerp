@@ -59,12 +59,21 @@ class GerpIndexer {
         std::hash<std::string> hasher;
 
         /* isCRLF is whether the text documents use CRLF or LF */
+<<<<<<< HEAD
         size_t prime[14] = {6131, 11621, 23291, 35671, 42013, 61543, 81667, 102161, 
                          116239, 137239, 257591, 307283, 507961, 1000003};
+=======
+        size_t prime[25] = {6131, 11621, 23291, 35671, 42013, 61543, 81667, 
+                            102161, 116239, 137239, 257591, 307283, 507961, 
+                            1000003, 2269733, 3042161, 4535189, 7474967,
+                            9737333, 14161729, 17624813, 19734581, 23391799, 
+                            29499439, 37139213};
+>>>>>>> 8deddd4 (insert method comparison)
         int primeIndex = 0;
         bool isCRLF = false; //type of end line sequence
         int elements = 0;
         int cLN = 0; //current line number
+        int test = 0;
 
         /* Member Functions */
         void indexFiles(std::string directory);

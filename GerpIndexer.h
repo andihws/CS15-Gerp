@@ -53,26 +53,26 @@ class GerpIndexer {
 
         /* Lists for file paths and hashtable */
         std::vector<std::string> paths;
-        std::vector<Word> hashTable {prime[0]};
+        std::vector<Word> hashTable;
 
         /* Hash Function */
         std::hash<std::string> hasher;
 
         /* isCRLF is whether the text documents use CRLF or LF */
-        int prime[14] = {6131, 11621, 23291, 35671, 42013, 61543, 81667, 102161, 
+        size_t prime[14] = {6131, 11621, 23291, 35671, 42013, 61543, 81667, 102161, 
                          116239, 137239, 257591, 307283, 507961, 1000003,};
         int primeIndex = 0;
         bool isCRLF = false; //type of end line sequence
-        int elements;
+        int elements = 0;
         int cLN = 0; //current line number
 
         /* Member Functions */
         void indexFiles(std::string directory);
-        void indexFile(std::string filePath);
+        void indexFile();
         std::set<std::string> processLine(const std::string &line);
         void insertWord(std::string word, std::string currFilePath, bool insen);
-        void insertCaseSensWord(std::string word, std::string currFilePath);
-        void insertCaseInSensWord(std::string word, std::string currFilePath);
+        // void insertCaseSensWord(std::string word, std::string currFilePath);
+        // void insertCaseInSensWord(std::string word, std::string currFilePath);
         void rehash();
         int  hashWord(std::string word);
         int  quadraticProbe(int value, int attempts);

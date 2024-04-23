@@ -15,6 +15,7 @@
 using namespace std;
 
 GerpIndexer::GerpIndexer() {
+    hashTable.resize(prime[primeIndex]);
 }
 
 GerpIndexer::~GerpIndexer() {
@@ -36,7 +37,7 @@ void GerpIndexer::indexFiles(string directory) {
         getFileNames(root, "");
 }
 
-void GerpIndexer::indexFile(string filePath) {
+void GerpIndexer::indexFile() {
     ifstream infile;
     string line = "";
     for (size_t i = 0; i < paths.size(); i++) {
@@ -66,7 +67,7 @@ set<string> GerpIndexer::processLine(const string& line) {
 
 string GerpIndexer::toLower(string word){
     string newWord = "";
-    for(int i = 0; i < word.length(); i++){
+    for(int i = 0; i < int(word.length()); i++){
         newWord += char(tolower(word[i]));
     }
     
@@ -82,7 +83,7 @@ void GerpIndexer::insertWord(string word, string currFilePath, bool insen) {
     if (word != toLower(word)) 
         insertWord(toLower(word), currFilePath, true);
 
-    while (hashTable[value].key != "" or hashTable[value].key != word)
+    while (hashTable[value].key != "" and hashTable[value].key != word)
         value = quadraticProbe(value, ++attempts);     
 
     /* Case 1: Word is already on the hash table */
@@ -111,8 +112,7 @@ void GerpIndexer::insertWord(string word, string currFilePath, bool insen) {
         hashTable[newWord.value].sLines.push_back(lineCaseSens);    
 
         /*add the caseSen line if it doesnt exist and lowercase*/
-        if (insen = true) {
-            hashTable[newWord.value] = newWord;
+        if (insen == true or word == toLower(word)) {
             lineCaseInSens.filePath = currFilePath;
             lineCaseInSens.lines.push_back(cLN);
             hashTable[newWord.value].isLines.push_back(lineCaseInSens);            
@@ -120,53 +120,13 @@ void GerpIndexer::insertWord(string word, string currFilePath, bool insen) {
     }
 }
 
-    
-
-//we need the file path for each word...
-void GerpIndexer::insertCaseSensWord(string word, string currFilePath) {
-    
-}
-
-//need to avoid rehashing words that are already all lowercase 
-// if( word != toLower(word) ) add it into the hash table using another function 
-/*
-void GerpIndexer::insertCaseSensWord(string word, string currFilePath) {
-    Line lineCaseSens;
-    Word newWord;
-    int attempts = 0;
-    newWord.key = word;
-    newWord.value = hashWord(word);
-    while (hashTable[newWord.value].key != "" or hashTable[newWord.value].key == word) {
-        newWord.value = quadraticProbe(newWord.value, attempts);
-
-        //check of word isnt already lowercase
-        if (word != toLower(word)){
-            caseinsensInsert(word, currFilePath)
-        }
-    }
-        
-    hashTable[newWord.value] = newWord;
-    lineCaseSens.filePath = currFilePath;
-    lineCaseSens.lines.push_back(cLN);
-    hashTable[newWord.value].sLines.push_back(lineCaseSens);
-}
-
-
-void GerpIndexer::insertInsensWord(string word, string currFilePath) {
-    
-}
-*/
-
-
-
-
 void GerpIndexer::rehash() {
     if (float(elements)/float(hashTable.capacity()) > 0.72) {
         vector<Word> tempHashTable = hashTable;
         primeIndex++;
         vector<Word> newHashTable {size_t(prime[primeIndex])};
         hashTable = newHashTable;
-        for (int i = 0; i < tempHashTable.size(); i++) {
+        for (size_t i = 0; i < tempHashTable.size(); i++) {
             if (not tempHashTable[i].key.empty()) {
                 tempHashTable[i].value = hashWord(tempHashTable[i].key);
                 hashTable[tempHashTable[i].value] = tempHashTable[i];

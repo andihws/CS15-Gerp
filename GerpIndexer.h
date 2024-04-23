@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 #include <functional>
 #include <iostream>
 #include <fstream>
@@ -27,7 +28,6 @@ class GerpIndexer {
         GerpIndexer();
         ~GerpIndexer();
 
-    private:
         /* Structs */
         struct Line {
             std::vector<int> lines;
@@ -39,12 +39,12 @@ class GerpIndexer {
                 Lines where the word is case exact, if the word is "The", it 
                 will only contain lines with "The"
             */
-            std::vector<Line> caseSensLines;
+            std::vector<Line> sLines; //senseitive lines
             /*
                 Lines where the word is case inexact, if the word is "the", it 
                 will contain "THe", "The", "THE", and "tHe".
             */
-            std::vector<Line> insensLines;
+            std::vector<Line> isLines; //insensitive lines
             std::string key;
             int value = -1;
         };
@@ -53,23 +53,30 @@ class GerpIndexer {
 
         /* Lists for file paths and hashtable */
         std::vector<std::string> paths;
-        std::vector<Word> hashTable {10000};
+        std::vector<Word> hashTable {prime[0]};
 
         /* Hash Function */
         std::hash<std::string> hasher;
 
         /* isCRLF is whether the text documents use CRLF or LF */
-        bool isCRLF = false;
+        int prime[14] = {6131, 11621, 23291, 35671, 42013, 61543, 81667, 102161, 
+                         116239, 137239, 257591, 307283, 507961, 1000003,};
+        int primeIndex = 0;
+        bool isCRLF = false; //type of end line sequence
         int elements;
-        int currLineNumber = 0;
+        int cLN = 0; //current line number
 
         /* Member Functions */
         void indexFiles(std::string directory);
         void indexFile(std::string filePath);
-        void processLine();
-        void insertWord();
+        std::set<std::string> processLine(const std::string &line);
+        void insertWord(std::string word, std::string currFilePath, bool insen);
+        void insertCaseSensWord(std::string word, std::string currFilePath);
+        void insertCaseInSensWord(std::string word, std::string currFilePath);
         void rehash();
         int  hashWord(std::string word);
+        int  quadraticProbe(int value, int attempts);
+        std::string toLower(std::string word);
         
 
         /* Helper Functions */

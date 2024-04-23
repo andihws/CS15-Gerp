@@ -217,33 +217,13 @@ void indexFileTest() {
 void indexFileTestSmall() {
     auto start = chrono::high_resolution_clock::now();
     GerpIndexer l;
-<<<<<<< HEAD
-    l.indexFiles("./testData");
-=======
     l.indexFiles("./test-dir/smallGutenberg");
->>>>>>> 8deddd4 (insert method comparison)
     l.indexFile();
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
     cout << "Time taken by function: "
          << duration.count() << " milliseconds" << endl;
 
-<<<<<<< HEAD
-    cout << "Hash: " << l.hashTable[l.hashWord("hello")].value << endl;
-    cout << "Word: " << l.hashTable[l.hashWord("hello")].key << endl;
-    for (size_t j = 0; j < l.hashTable[l.hashWord("hello")].isLines.size(); j++) {
-        cout << "File Path IS: " << l.hashTable[l.hashWord("hello")].isLines[j].filePath << endl;
-        for (int ln : l.hashTable[l.hashWord("hello")].isLines[j].lines) {
-            cout << ln << endl;
-        }
-    }
-    for (size_t j = 0; j < l.hashTable[l.hashWord("hello")].sLines.size(); j++) {
-        cout << "File Path S: " << l.hashTable[l.hashWord("hello")].sLines[j].filePath << endl;
-        for (int ln : l.hashTable[l.hashWord("hello")].sLines[j].lines) {
-            cout << ln << endl;
-        }
-    }
-=======
     // cout << "Hash: " << l.hashTable[l.hashWord("hello")].value << endl;
     // cout << "Word: " << l.hashTable[l.hashWord("hello")].key << endl;
     // for (size_t j = 0; j < l.hashTable[l.hashWord("hello")].isLines.size(); j++) {
@@ -258,5 +238,4 @@ void indexFileTestSmall() {
     //         cout << ln << endl;
     //     }
     // }
->>>>>>> 8deddd4 (insert method comparison)
 }

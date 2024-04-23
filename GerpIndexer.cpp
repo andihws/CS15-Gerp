@@ -35,6 +35,7 @@ void GerpIndexer::indexFiles(string directory) {
     DirNode *root = fileTree.getRoot();
     if (not root->isEmpty()) 
         getFileNames(root, "");
+    
 }
 
 void GerpIndexer::indexFile() {
@@ -43,16 +44,14 @@ void GerpIndexer::indexFile() {
     for (size_t i = 0; i < paths.size(); i++) {
         infile.open(paths[i]);
         while (getline(infile, line)) {
-            processLine(line);
+            processLine(line, paths[i]);
         }
+        infile.close();
+        cLN = 0;
     }
 }
 
-set<string> GerpIndexer::processLine(const string& line) {
-    if (not isCRLF) 
-        cLN = cLN + line.length() + 1;
-    else 
-        cLN = cLN + line.length() + 2;
+void GerpIndexer::processLine(const string& line, string currFilePath) {
     stringstream ss(line);
     string word;
     set<string> words;
@@ -62,12 +61,19 @@ set<string> GerpIndexer::processLine(const string& line) {
         words.insert(word);
     }
 
-    return words;
+    for (string w : words) {
+        insertWord(w, currFilePath);
+    }
+
+    if (not isCRLF) 
+        cLN = cLN + line.length() + 1;
+    else 
+        cLN = cLN + line.length() + 2;
 }
 
 string GerpIndexer::toLower(string word){
     string newWord = "";
-    for(int i = 0; i < int(word.length()); i++){
+    for(int i = 0; i < int(word.length()); i++) {
         newWord += char(tolower(word[i]));
     }
     
@@ -89,36 +95,61 @@ void GerpIndexer::insertWord(string word, string currFilePath, bool insen) {
     /* Case 1: Word is already on the hash table */
     if (hashTable[value].key == word) {
         /* If it is converting the word to lower case, add to insens */
-        if (insen == true) 
-            hashTable[value].isLines.back().lines.push_back(cLN);
+        if (insen == true) {    
+            if (hashTable[value].isLines.back().filePath == currFilePath) 
+                hashTable[value].isLines.back().lines.insert(cLN);
+            else 
+                insertNewLine(currFilePath, value, true);
+        }
         /* If the word is already lower case, add to both */
         else if (word == toLower(word)) { 
-            hashTable[value].sLines.back().lines.push_back(cLN);
-            hashTable[value].isLines.back().lines.push_back(cLN);
+            if (hashTable[value].sLines.back().filePath == currFilePath) 
+                hashTable[value].sLines.back().lines.insert(cLN);
+            else 
+                insertNewLine(currFilePath, value, false);
+            if (hashTable[value].isLines.back().filePath == currFilePath) 
+                hashTable[value].isLines.back().lines.insert(cLN);
+            else 
+                insertNewLine(currFilePath, value, true);
         } 
         /* Otherwise, add word to caseSens if not all lowercase*/
-        else 
-            hashTable[value].sLines.back().lines.push_back(cLN);
+        else {
+            if (hashTable[value].sLines.back().filePath == currFilePath) 
+                hashTable[value].sLines.back().lines.insert(cLN);
+            else 
+                insertNewLine(currFilePath, value, false);
+        }
     } else {
         Word newWord;
         newWord.key = word;
         newWord.value = value;
-        Line lineCaseSens;
-        Line lineCaseInSens;
+        
         /*add the caseSen line if it doesnt exist*/
         hashTable[newWord.value] = newWord;
-        lineCaseSens.filePath = currFilePath;
-        lineCaseSens.lines.push_back(cLN);
-        hashTable[newWord.value].sLines.push_back(lineCaseSens);    
+        insertNewLine(currFilePath, value, false);
 
         /*add the caseSen line if it doesnt exist and lowercase*/
         if (insen == true or word == toLower(word)) {
-            lineCaseInSens.filePath = currFilePath;
-            lineCaseInSens.lines.push_back(cLN);
-            hashTable[newWord.value].isLines.push_back(lineCaseInSens);            
+            insertNewLine(currFilePath, value, true);          
         }
+    }   
+}
+
+
+void GerpIndexer::insertNewLine(std::string currFile, int hash, bool insens) {
+    if (insens == false) {
+        Line lineCaseSens;
+        lineCaseSens.filePath = currFile;
+        lineCaseSens.lines.insert(cLN);
+        hashTable[hash].sLines.push_back(lineCaseSens);
+    } else {
+        Line lineCaseInSens;
+        lineCaseInSens.filePath = currFile;
+        lineCaseInSens.lines.insert(cLN);
+        hashTable[hash].isLines.push_back(lineCaseInSens);         
     }
 }
+
 
 void GerpIndexer::rehash() {
     if (float(elements)/float(hashTable.capacity()) > 0.72) {
@@ -135,6 +166,7 @@ void GerpIndexer::rehash() {
     }
 }
 
+ 
 int GerpIndexer::hashWord(string word) {
     return hasher(word) % hashTable.capacity();
 }

@@ -6,7 +6,7 @@
 MAKEFLAGS += -B
 
 CXX = clang++
-CXXFLAGS = -g3 -Wall -Wextra -Wpedantic -Wshadow
+CXXFLAGS = -g3 -Wall -Wextra -Wpedantic -Wshadow -O2
 LDFLAGS = -g3
 
 GerpIndexer.o: GerpIndexer.cpp GerpIndexer.h DirNode.o FSTree.o

@@ -44,27 +44,29 @@ void GerpIndexer::indexFile() {
     for (size_t i = 0; i < paths.size(); i++) {
         infile.open(paths[i]);
         while (getline(infile, line)) {
-            processLine(line, paths[i]);
+            processLine(line, i);
         }
         infile.close();
         cLN = 0;
     }
 }
 
-void GerpIndexer::processLine(const string& line, string currFilePath) {
+void GerpIndexer::processLine(const string& line, int currFilePath) {
     stringstream ss(line);
     string word;
     set<string> words;
 
     while (ss >> word) {
         word = stripNonAlphaNum(word);
-        if (not word.empty()) 
+        if (not word.empty()) {
             words.insert(word);
+        }            
     }
 
     for (string w : words) {
-        insertWord(w, currFilePath);
+        insert(w, currFilePath);
     }
+        
 
     if (not isCRLF) 
         cLN = cLN + line.length() + 1;
@@ -82,96 +84,128 @@ string GerpIndexer::toLower(string word){
 }
 
 
-void GerpIndexer::insertWord(string word, string currFilePath, bool insen) {
-    elements++;
-    rehash();
-    int attempts = 0;
-    int value = hashWord(word);
-    if (word != toLower(word)) 
-        insertWord(toLower(word), currFilePath, true);
+// void GerpIndexer::insertWord(string word, string currFilePath, bool insen) {
+//     elements++;
+//     rehash();
+//     int attempts = 0;
+//     int value = hashWord(word);
+//     if (word != toLower(word)) 
+//         insertWord(toLower(word), currFilePath, true);
 
+//     while (hashTable[value].key != "" and hashTable[value].key != word)
+//         value = quadraticProbe(value, ++attempts);
+
+//     /* Case 1: Word is already on the hash table */
+//     if (hashTable[value].key == word) {
+//         /* If it is converting the word to lower case, add to insens */
+//         if (insen == true) {    
+//             if (hashTable[value].isLines.back().filePath == currFilePath) 
+//                 hashTable[value].isLines.back().lines.insert(cLN);
+//             else 
+//                 insertNewLine(currFilePath, value, true);
+//         }
+//         /* If the word is already lower case, add to both */
+//         else if (word == toLower(word)) { 
+//             if (hashTable[value].sLines.back().filePath == currFilePath) 
+//                 hashTable[value].sLines.back().lines.insert(cLN);
+//             else 
+//                 insertNewLine(currFilePath, value, false);
+//             if (hashTable[value].isLines.back().filePath == currFilePath) 
+//                 hashTable[value].isLines.back().lines.insert(cLN);
+//             else 
+//                 insertNewLine(currFilePath, value, true);
+//         } 
+//         /* Otherwise, add word to caseSens if not all lowercase*/
+//         else {
+//             if (hashTable[value].sLines.back().filePath == currFilePath) 
+//                 hashTable[value].sLines.back().lines.insert(cLN);
+//             else 
+//                 insertNewLine(currFilePath, value, false);
+//         }
+//     } else {
+//         Word newWord;
+//         newWord.key = word;
+//         newWord.value = value;
+        
+//         /*add the caseSen line if it doesnt exist*/
+//         hashTable[newWord.value] = newWord;
+//         insertNewLine(currFilePath, value, false);
+
+//         /*add the caseSen line if it doesnt exist and lowercase*/
+//         if (insen == true or word == toLower(word)) {
+//             insertNewLine(currFilePath, value, true);          
+//         }
+//     }   
+// }
+
+void GerpIndexer::insertWord(string word, string currFilePath, bool insen) {
+    rehash(hashTable.capacity());
+    int attempts = 0;
+    int value = hashWord(word, hashTable.capacity());
     while (hashTable[value].key != "" and hashTable[value].key != word)
         value = quadraticProbe(value, ++attempts);
-
-    /* Case 1: Word is already on the hash table */
-    if (hashTable[value].key == word) {
-        /* If it is converting the word to lower case, add to insens */
-        if (insen == true) {    
-            if (hashTable[value].isLines.back().filePath == currFilePath) 
-                hashTable[value].isLines.back().lines.insert(cLN);
-            else 
-                insertNewLine(currFilePath, value, true);
-        }
-        /* If the word is already lower case, add to both */
-        else if (word == toLower(word)) { 
-            if (hashTable[value].sLines.back().filePath == currFilePath) 
-                hashTable[value].sLines.back().lines.insert(cLN);
-            else 
-                insertNewLine(currFilePath, value, false);
-            if (hashTable[value].isLines.back().filePath == currFilePath) 
-                hashTable[value].isLines.back().lines.insert(cLN);
-            else 
-                insertNewLine(currFilePath, value, true);
-        } 
-        /* Otherwise, add word to caseSens if not all lowercase*/
-        else {
-            if (hashTable[value].sLines.back().filePath == currFilePath) 
-                hashTable[value].sLines.back().lines.insert(cLN);
-            else 
-                insertNewLine(currFilePath, value, false);
-        }
-    } else {
-        Word newWord;
-        newWord.key = word;
-        newWord.value = value;
-        
-        /*add the caseSen line if it doesnt exist*/
-        hashTable[newWord.value] = newWord;
-        insertNewLine(currFilePath, value, false);
-
-        /*add the caseSen line if it doesnt exist and lowercase*/
-        if (insen == true or word == toLower(word)) {
-            insertNewLine(currFilePath, value, true);          
-        }
-    }   
+    if (hashTable[value].key != word)
+        addNewWord(word, value);
+    if (not insen) 
+        insertNewLine(currFilePath, hashTable[value], false);
+    else {
+        insertSensWord(hashTable[value], word, currFilePath);
+    }
 }
 
+void GerpIndexer::insertSensWord(Word &w, string word, string currFile) {
 
-void GerpIndexer::insertNewLine(std::string currFile, int hash, bool insens) {
-    if (insens == false) {
-        Line lineCaseSens;
-        lineCaseSens.filePath = currFile;
-        lineCaseSens.lines.insert(cLN);
-        hashTable[hash].sLines.push_back(lineCaseSens);
+}
+
+void GerpIndexer::insert(string word, string currFilePath, bool insen) {
+    if (word == toLower(word)) {
+        insertWord(word, currFilePath);
     } else {
-        Line lineCaseInSens;
-        lineCaseInSens.filePath = currFile;
-        lineCaseInSens.lines.insert(cLN);
-        hashTable[hash].isLines.push_back(lineCaseInSens);         
+        insertWord(word, currFilePath, true);
     }
 }
 
 
-void GerpIndexer::rehash() {
-    if (float(elements)/float(hashTable.capacity()) > 0.72) {
-        cout << ++test << endl;
-        vector<Word> tempHashTable = hashTable;
+void GerpIndexer::addNewWord(string word, int wordHash) {
+    Word newWord;
+    newWord.key = word;
+    newWord.value = wordHash;
+    hashTable[newWord.value] = newWord;
+}
+
+void GerpIndexer::insertNewLine(std::string currFile, Word &word, bool insen) {
+    if (not insen) {
+        if (word.lines.size() > 0 and word.lines.back().second == currFile) {
+            word.lines.back().first.push_back(cLN);
+        } else {
+            pair<vector<int>, string> newLine;
+            newLine.first.push_back(cLN);
+            newLine.second = currFile;
+            word.lines.push_back(newLine);
+        }
+    }
+}
+
+
+void GerpIndexer::rehash(int capacity) {
+    if (float(hashTable.size())/float(capacity) > 0.72) {
+        cout << ++rehashAmount << endl;
         primeIndex++;
-        vector<Word> newHashTable;
-        newHashTable.resize(prime[primeIndex]);
-        hashTable = newHashTable;
-        for (size_t i = 0; i < tempHashTable.size(); i++) {
-            if (not tempHashTable[i].key.empty()) {
-                tempHashTable[i].value = hashWord(tempHashTable[i].key);
-                hashTable[tempHashTable[i].value] = tempHashTable[i];
+        vector<Word> tempHashTable;
+        tempHashTable.resize(prime[primeIndex]);
+        int newCapacity = prime[primeIndex];
+        for (size_t i = 0; i < hashTable.size(); i++) {
+            if (not hashTable[i].key.empty()) {
+                hashTable[i].value = hashWord(hashTable[i].key, newCapacity);
+                tempHashTable[hashTable[i].value] = hashTable[i];
             }
         }
+        hashTable = tempHashTable;
     }
 }
-
  
-int GerpIndexer::hashWord(string word) {
-    return hasher(word) % hashTable.capacity();
+int GerpIndexer::hashWord(string word, int capacity) {
+    return hasher(word) % capacity;
 }
 
 int GerpIndexer::quadraticProbe(int value, int attempts) {

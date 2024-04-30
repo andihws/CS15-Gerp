@@ -16,7 +16,12 @@
 
 
 class Gerp {
+    public:
+        Gerp();
+        ~Gerp();
 
+    private:
+        void queryLoop();
 };
 
 #endif

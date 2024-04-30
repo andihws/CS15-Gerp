@@ -9,6 +9,12 @@ CXX = clang++
 CXXFLAGS = -g3 -Wall -Wextra -Wpedantic -Wshadow -O2
 LDFLAGS = -g3
 
+gerp: main.o GerpIndexer.o DirNode.o FSTree.o
+	$(CXX) ${LDFLAGS} -o $@ $^
+
+main.o: main.cpp GerpIndexer.o DirNode.o FSTree.o
+	$(CXX) $(CXXFLAGS) -c main.cpp
+
 GerpIndexer.o: GerpIndexer.cpp GerpIndexer.h DirNode.o FSTree.o
 	$(CXX) $(CXXFLAGS) -c GerpIndexer.cpp
 

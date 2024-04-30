@@ -8,3 +8,18 @@
  *  Implentation of the Gerp class
  *
  */
+
+#include "Gerp.h"
+
+Gerp::Gerp() {
+
+}
+
+Gerp::~Gerp() {
+
+}
+
+void Gerp::queryLoop() {
+
+
+}

@@ -90,11 +90,11 @@ void toLowerTest() {
     cout << l.toLower("BEAN") << endl;
 }
 
-void insertWordTestAllLower() {
-    GerpIndexer l;
-    l.insertWord("bean", "/test/text.txt", false);
-    cout << l.hashTable[l.hashWord("bean")].value << endl;
-}
+// void insertWordTestAllLower() {
+//     GerpIndexer l;
+//     l.insertWord("bean", "/test/text.txt", false);
+//     cout << l.hashTable[l.hashWord("bean")].value << endl;
+// }
 
 // void insertWordTestAllUpper() {
 //     GerpIndexer l;
@@ -215,14 +215,14 @@ void indexFileTest() {
 }
 
 void indexFileTestSmall() {
-    auto start = chrono::high_resolution_clock::now();
+    // auto start = chrono::high_resolution_clock::now();
     GerpIndexer l;
     l.indexFiles("./test-dir/smallGutenberg");
     l.indexFile();
-    auto stop = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
-    cout << "Time taken by function: "
-         << duration.count() << " milliseconds" << endl;
+    // auto stop = chrono::high_resolution_clock::now();
+    // auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
+    // cout << "Time taken by function: "
+    //      << duration.count() << " milliseconds" << endl;
 
     // cout << "Hash: " << l.hashTable[l.hashWord("hello")].value << endl;
     // cout << "Word: " << l.hashTable[l.hashWord("hello")].key << endl;

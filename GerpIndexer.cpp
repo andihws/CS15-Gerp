@@ -257,48 +257,19 @@ void GerpIndexer::makeFileTree(string directory) {
  * effects: increases the size of the hash table, allocates more space on the
  *          for the hash table
  */
-// void GerpIndexer::rehash() {
-//     //check if load balance is greater than 0.72
-//     if (float(numElements)/float(hashTable.capacity()) > 0.72) {
-//         cout << "going to rehash" << endl;
-
-//         //create a temp hash table
-//         //my question is: is the size for the hash too big??? lets go to office hours and ask
-//         vector<vector<WordData>> tempTable = hashTable;
-//         primeIndex++;
-
-//         //make the new hash table with the new size
-//         vector<vector<WordData>> newTable;
-//         newTable.resize(prime[primeIndex]);
-
-//         //add the old hash table elements to the new hash table
-//         hashTable = newTable;
-//         for (size_t i = 0; i < tempTable.size(); i++) {
-//             if (not tempTable[i].empty()) {
-//                 string theWord = toLower(tempTable[i][0].word);
-//                 int index = getHash(theWord);
-//                 hashTable[index] = tempTable[i];
-//             }
-//         }
-//     }
-// }
-
 void GerpIndexer::rehash() {
-    if(float(numElements) / float(hashTable.capacity()) > 0.7) {
-        
-        size_t newCapacity = (hashTable.size() + 2) * 2;
-        vector<vector<WordData>> newHash;
-        newHash.resize(newCapacity);
-
-        //maybe risky becasue i am just copying the whole vector over
-        for(size_t i = 0; i < hashTable.size(); i++) {
-            if(not hashTable[i].empty()) {
-                size_t newIndex = hash(toLower(hashTable[i][0].word)) % newCapacity;
-                newHash[newIndex] = hashTable[i];
-            }            
+    if (float(hashTable.size())/float(hashTable.capacity()) > 0.72) {
+        primeIndex++;
+        vector<Word> tempHashTable;
+        tempHashTable.resize(prime[primeIndex]);
+        int newCapacity = prime[primeIndex];
+        for (size_t i = 0; i < hashTable.size(); i++) {
+            if (not hashTable[i].key.empty()) {
+                hashTable[i].value = hashWord(hashTable[i].key, newCapacity);
+                tempHashTable[hashTable[i].value] = hashTable[i];
+            }
         }
-
-        hashTable = newHash;
+        hashTable = tempHashTable;
     }
 }
 

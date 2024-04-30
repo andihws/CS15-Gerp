@@ -28,67 +28,46 @@ class GerpIndexer {
         GerpIndexer();
         ~GerpIndexer();
 
-        /* Structs */
-        struct Line {
-            std::set<int> lines;
-            std::string filePath;
+        //search
+
+    private:
+        //member variables for hash table
+        std::vector<std::string> filepaths;
+        struct WordData {
+            std::string word = "";
+            int filePath;
+            int lineNum;
         };
+        std::vector<std::vector<WordData>> hashTable;
 
-        struct Word {
-            /*
-                Lines where the word is case exact, if the word is "The", it 
-                will only contain lines with "The"
-            */
-            std::vector<Line> sLines; //sensitive lines
-            /*
-                Lines where the word is case inexact, if the word is "the", it 
-                will contain "THe", "The", "THE", and "tHe".
-            */
-            std::vector<Line> isLines; //insensitive lines
-            std::string key;
-            int value = -1;
-        };
-        
-        /* Member Variables */
+        //file storing members and functions
+        std::vector<std::vector<std::string>> files;
+        void makeFileTree(std::string directory);
 
-        /* Lists for file paths and hashtable */
-        std::vector<std::string> paths;
-        std::vector<Word> hashTable;
-
-        /* Hash Function */
-        std::hash<std::string> hasher;
-
-        /* isCRLF is whether the text documents use CRLF or LF */
-        size_t prime[25] = {6131, 11621, 23291, 35671, 42013, 61543, 81667, 
+        //hash members and functions
+        std::hash<std::string> hash;
+        size_t prime[26] = {1013, 6131, 11621, 23291, 35671, 42013, 61543, 81667, 
                             102161, 116239, 137239, 257591, 307283, 507961, 
                             1000003, 2269733, 3042161, 4535189, 7474967,
                             9737333, 14161729, 17624813, 19734581, 23391799, 
                             29499439, 37139213};
         int primeIndex = 0;
-        bool isCRLF = false; //type of end line sequence
-        int elements = 0;
-        int cLN = 0; //current line number
-        int test = 0;
-
-        /* Member Functions */
-        void indexFiles(std::string directory);
-        void indexFile();
-        void processLine(const std::string &line, std::string currFilePath);
-        void insertWord(std::string word, std::string currFilePath, 
-                        bool insen = false);
-        // void insertCaseSensWord(std::string word, std::string currFilePath);
-        // void insertCaseInSensWord(std::string word, std::string currFilePath);
+        int numElements = 0;
         void rehash();
-        int  hashWord(std::string word);
-        int  quadraticProbe(int value, int attempts);
-        std::string toLower(std::string word);
-        
+        int getHash(std::string word);
+        int quadraticProbe(int value, int attempts);
+        int linearProbe(int value, int attempts);
+        void wordInsert(std::string word, int linenum, int filepath);
+        void insertUniqueWords(int linenum, int filepath, std::string line);
 
-        /* Helper Functions */
-        void getFileNames(DirNode *root, std::string path);
-        bool isAlphaNum(char c);
+        //helper functions
+        void getFileNames(std::vector<std::string> &paths, DirNode *root, std::string path);
         std::string stripNonAlphaNum(std::string input);
-        void insertNewLine(std::string currFile, int hash, bool insens);
+        bool isAlphaNum(char c);
+        void indexFiles(std::string directory);
+        std::string toLower(std::string word);
+        void open_or_die(std::ifstream &stream, std::string fileName);
+        void abort(std::string errorMessage);
 
 
 };

@@ -330,11 +330,9 @@ void GerpIndexer::insensPrint(int value, ofstream &outstream) {
             } else if(line == line2 and filenum != filenum2) {
                 outstream << filepaths[filenum] << ":" << line << 
                         ": " << files[filenum][line - 1] << endl;
-
             } else if(line != line2 and filenum == filenum2) {
                 outstream << filepaths[filenum] << ":" << line << 
                             ": " << files[filenum][line - 1] << endl;
-
             } else if(line != line2 and filenum != filenum2){
                 outstream << filepaths[filenum] << ":" << line << 
                             ": " << files[filenum][line - 1] << endl;
@@ -356,11 +354,10 @@ void GerpIndexer::insensPrint(int value, ofstream &outstream) {
  */
 void GerpIndexer::sensPrint(int value, string word, ofstream &outstream) {
     for(size_t i = 0; i < hashTable[value].size(); i++){
-        //the word is the correct version
         if(word == hashTable[value][i].word) {
             int line = hashTable[value][i].lineNum + 1;
             int filenum = hashTable[value][i].filePath;  
-            if(i == 0) {
+            if(i == 0) {               
                 outstream << filepaths[filenum] << ":" << line << 
                             ": " << files[filenum][line - 1] << endl;
             }
@@ -393,7 +390,7 @@ void GerpIndexer::sensPrint(int value, string word, ofstream &outstream) {
  * purpose: to check if the index of a word was probed
  * arguments: a string word to be searched for in the hash table
  *            and checked if linear probing was applied
- * returns: none
+ * returns: returns the new hash value, otherwise -1 if the value does exist
  * effects: none
  */
 int GerpIndexer::probeCheck(string word) {
@@ -411,15 +408,10 @@ int GerpIndexer::probeCheck(string word) {
         while(not found) {
             newVal = linearProbe(value, attempts);
             attempts++;
-            if(newVal >= hashTable.capacity()) {
+            if(hashTable[newVal].empty())
                 return -1;
-            }
-            if(hashTable[newVal].empty()) {
-                return -1;
-            }
-            if(toLower(hashTable[newVal][0].word) == toLower(word)) {
-                return newVal;                   
-            }
+            if(toLower(hashTable[newVal][0].word) == toLower(word))
+                return newVal;
         }
     } 
     return value;

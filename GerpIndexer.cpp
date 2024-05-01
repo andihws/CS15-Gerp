@@ -264,8 +264,8 @@ void GerpIndexer::rehash() {
         tempHashTable.resize(prime[primeIndex]);
         int newCapacity = prime[primeIndex];
         for (size_t i = 0; i < hashTable.size(); i++) {
-            if (not hashTable[i].key.empty()) {
-                hashTable[i].value = hashWord(hashTable[i].key, newCapacity);
+            if (not hashTable[i].first.empty()) {
+                hashTable[i].value = hashWord(hashTable[i].key);
                 tempHashTable[hashTable[i].value] = hashTable[i];
             }
         }
@@ -296,8 +296,10 @@ string GerpIndexer::toLower(string word) {
  * returns: an int represented the passed in word's hash value
  * effects: none
  */
-int GerpIndexer::getHash(string word) {
-    return hash(word) % hashTable.capacity();
+int GerpIndexer::hashWord(string word) {
+    int value = hasher(word) % hashTable.capacity();
+    int attempts = 0;
+    while (hashTable[value])
 }
 
 /*

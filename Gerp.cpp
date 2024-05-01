@@ -32,33 +32,36 @@ void Gerp::commandLoop(string dir, string outfile) {
     cout << "Query? ";
     string commands;
     string command;
+    string currFile = outfile;
 
     bool quit = false;
     cin >> command;
-    while(not quit) {
-        if(command == "@q") {
+    while (not quit) {
+        if (command == "@q") {
             quit = true;
-        } else if(command == "@quit") {
+        } else if (command == "@quit") {
             quit = true;
-        } else if(command == "@i") {
+        } else if (command == "@i") {
             cin >> command;
             string word = indexer.stripNonAlphaNum(command);
             indexer.insensSearch(word, outstream);
-        } else if(command == "@insensitive") {
+        } else if (command == "@insensitive") {
             cin >> command;
             string word = indexer.stripNonAlphaNum(command);
             indexer.insensSearch(word, outstream);            
-        } else if(command == "@f") {
-            outstream.close();
+        } else if (command == "@f") {
             cin >> command;
-            open_or_die(outstream, command);
-
+            if (command != currFile) {
+                outstream.close();
+                currFile = command;
+                open_or_die(outstream, command);
+            }   
         } else {
             string word = indexer.stripNonAlphaNum(command);
             indexer.sensSearch(word, outstream);    
         }
 
-        if(not quit) {
+        if (not quit) {
             cout << "Query? ";
             cin >> command;
         }    
@@ -77,7 +80,7 @@ void Gerp::commandLoop(string dir, string outfile) {
  */
 void Gerp::open_or_die(ofstream &stream, string fileName) {
     stream.open(fileName);
-    if(not stream.is_open()){
+    if (not stream.is_open()) {
         cout << "Could not open output file" << endl;
         exit(EXIT_FAILURE);
     }

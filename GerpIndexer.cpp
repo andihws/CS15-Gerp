@@ -58,7 +58,7 @@ void GerpIndexer::indexFiles(string directory) {
             files[i].push_back(line);
 
             //hash words in the line
-            if(line.length() > 0) {
+            if (line.length() > 0) {
                insertUniqueWords(linenum, i, line); 
             }
 
@@ -88,11 +88,11 @@ void GerpIndexer::insertUniqueWords(int linenum, int filepath, string line) {
     //interate through each word
     while(ss >> theWord) {
         theWord = stripNonAlphaNum(theWord);
-        if(theWord.length() > 0) {
+        if (theWord.length() > 0) {
             uniqueWords.insert(theWord);
 
             //if the set gets bigger, the word is unique, add to hashtable
-            if(uniqueWords.size() > currSize) {
+            if (uniqueWords.size() > currSize) {
                 numElements++;
                 rehash();
                 wordInsert(theWord, linenum, filepath);
@@ -115,27 +115,27 @@ void GerpIndexer::wordInsert(string word, int linenum, int filepath) {
     neWord.word = word; neWord.lineNum = linenum; neWord.filePath = filepath;
     size_t value = getHash(toLower(word));
     //word doesn't exist in hash table
-    if(hashTable[value].empty()) {
+    if (hashTable[value].empty()) {
         vector<WordData> buckets;
         buckets.push_back(neWord);
         hashTable[value] = buckets;
     //word already exits 
-    } else if(toLower(hashTable[value][0].word) == toLower(word)) {
+    } else if (toLower(hashTable[value][0].word) == toLower(word)) {
         hashTable[value].push_back(neWord);
     //collision between different words, find pos, make new array, add word
-    } else if(toLower(hashTable[value][0].word) != toLower(word)) {
+    } else if (toLower(hashTable[value][0].word) != toLower(word)) {
         int attempts = 1;
         bool found = false;
         int newVal = 0;
         while(not found) {
             newVal = linearProbe(value, attempts);
             attempts++;
-            if(hashTable[newVal].empty()) {
+            if (hashTable[newVal].empty()) {
                 vector<WordData> buckets;
                 buckets.push_back(neWord);
                 hashTable[newVal] = buckets;
                 found = true;
-            } else if(toLower(hashTable[newVal][0].word) == toLower(word)){
+            } else if (toLower(hashTable[newVal][0].word) == toLower(word)){
                 hashTable[newVal].push_back(neWord);
                 found = true;
             } 
@@ -233,7 +233,7 @@ void GerpIndexer::makeFileTree(string directory) {
  *          for the hash table
  */
 void GerpIndexer::rehash() {
-    if(float(numElements) / float(hashTable.capacity()) > 0.72) {
+    if (float(numElements) / float(hashTable.capacity()) > 0.72) {
         
         size_t newCapacity = (hashTable.size() + 2) * 4;
         vector<vector<WordData>> newHash;
@@ -241,7 +241,7 @@ void GerpIndexer::rehash() {
 
         //maybe risky becasue i am just copying the whole vector over
         for(size_t i = 0; i < hashTable.size(); i++) {
-            if(not hashTable[i].empty()) {
+            if (not hashTable[i].empty()) {
                 size_t newIndex =
                     hash(toLower(hashTable[i][0].word)) % newCapacity;
                 newHash[newIndex] = hashTable[i];
@@ -301,7 +301,7 @@ int GerpIndexer::linearProbe(int value, int attempts) {
  */
 void GerpIndexer::open_or_die(ifstream &stream, std::string fileName) {
     stream.open(fileName);
-    if(not stream.is_open()){
+    if (not stream.is_open()){
         cout << "Could not build index, reason:\n" <<
             "Directory "<< fileName << " not found: could not build tree";
             exit(EXIT_FAILURE);
@@ -321,19 +321,19 @@ void GerpIndexer::insensPrint(int value, ofstream &outstream) {
     for(size_t i = 0; i < hashTable[value].size(); i++){
         int filenum = hashTable[value][i].filePath;
         int line = hashTable[value][i].lineNum + 1;
-        if(i != 0) {
+        if (i != 0) {
             int filenum2 = hashTable[value][i - 1].filePath;
             int line2 = hashTable[value][i -1].lineNum + 1;
-            if(filenum2 != filenum and line != line2 ){
+            if (filenum2 != filenum and line != line2 ){
                 outstream << filepaths[filenum] << ":" << line << 
                             ": " << files[filenum][line - 1] << endl;
-            } else if(line == line2 and filenum != filenum2) {
+            } else if (line == line2 and filenum != filenum2) {
                 outstream << filepaths[filenum] << ":" << line << 
                         ": " << files[filenum][line - 1] << endl;
-            } else if(line != line2 and filenum == filenum2) {
+            } else if (line != line2 and filenum == filenum2) {
                 outstream << filepaths[filenum] << ":" << line << 
                             ": " << files[filenum][line - 1] << endl;
-            } else if(line != line2 and filenum != filenum2){
+            } else if (line != line2 and filenum != filenum2){
                 outstream << filepaths[filenum] << ":" << line << 
                             ": " << files[filenum][line - 1] << endl;
             }
@@ -354,24 +354,24 @@ void GerpIndexer::insensPrint(int value, ofstream &outstream) {
  */
 void GerpIndexer::sensPrint(int value, string word, ofstream &outstream) {
     for(size_t i = 0; i < hashTable[value].size(); i++){
-        if(word == hashTable[value][i].word) {
+        if (word == hashTable[value][i].word) {
             int line = hashTable[value][i].lineNum + 1;
             int filenum = hashTable[value][i].filePath;  
-            if(i == 0) {               
+            if (i == 0) {               
                 outstream << filepaths[filenum] << ":" << line << 
                             ": " << files[filenum][line - 1] << endl;
             }
-            if(i != 0) {
+            if (i != 0) {
                 //the word before is not the same thing on the same line
-                if(hashTable[value][i-1].word != word) {
+                if (hashTable[value][i-1].word != word) {
                     outstream << filepaths[filenum] << ":" << line << 
                               ": " << files[filenum][line - 1] << endl;
                 //the word is the same
-                } else if(hashTable[value][i-1].word == word) {
+                } else if (hashTable[value][i-1].word == word) {
                     int linenum2 = hashTable[value][i - 1].lineNum + 1;
                     int filenum2 = hashTable[value][i - 1].filePath;
                     //if the linenum isnt the same print
-                    if(linenum2 != line) {
+                    if (linenum2 != line) {
                         outstream << filepaths[filenum] << ":" << line << 
                                   ": " << files[filenum][line - 1] << endl;
                     //if the file num is the same print
@@ -397,20 +397,20 @@ int GerpIndexer::probeCheck(string word) {
     //get the index 
     int value = getHash(toLower(word));
     //check if the word exists 
-    if(hashTable[value].empty()) {
+    if (hashTable[value].empty()) {
         return -1;
     }
     //check if the hash value was probed
-    if(toLower(hashTable[value][0].word) != toLower(word)){
+    if (toLower(hashTable[value][0].word) != toLower(word)){
         int attempts = 1;
         bool found = false;
         size_t newVal = 0;
         while(not found) {
             newVal = linearProbe(value, attempts);
             attempts++;
-            if(hashTable[newVal].empty())
+            if (hashTable[newVal].empty())
                 return -1;
-            if(toLower(hashTable[newVal][0].word) == toLower(word))
+            if (toLower(hashTable[newVal][0].word) == toLower(word))
                 return newVal;
         }
     } 
@@ -428,7 +428,7 @@ void GerpIndexer::insensSearch(string word, ofstream &outstream) {
     int value = probeCheck(word);
 
     //check if it exists
-    if(value != -1) {
+    if (value != -1) {
       insensPrint(value, outstream);  
     } else {
         outstream << word << " Not Found." << endl;
@@ -447,7 +447,7 @@ void GerpIndexer::sensSearch(string word, ofstream &outstream) {
     int value = probeCheck(word);
 
     //check if the word exists
-    if(value != -1) {
+    if (value != -1) {
       sensPrint(value, word, outstream); 
     } else {
         outstream << 

@@ -28,9 +28,14 @@ class GerpIndexer {
         GerpIndexer();
         ~GerpIndexer();
 
-        //search
+        //search and indexing
+        void indexFiles(std::string directory);
+        void insensSearch(std::string word, std::ofstream &outstream);
+        void sensSearch(std::string word, std::ofstream &outstream);
+        std::string stripNonAlphaNum(std::string input);
 
-    private:
+
+    // private:
         //member variables for hash table
         std::vector<std::string> filepaths;
         struct WordData {
@@ -46,29 +51,23 @@ class GerpIndexer {
 
         //hash members and functions
         std::hash<std::string> hash;
-        size_t prime[26] = {1013, 6131, 11621, 23291, 35671, 42013, 61543, 81667, 
-                            102161, 116239, 137239, 257591, 307283, 507961, 
-                            1000003, 2269733, 3042161, 4535189, 7474967,
-                            9737333, 14161729, 17624813, 19734581, 23391799, 
-                            29499439, 37139213};
-        int primeIndex = 0;
         int numElements = 0;
         void rehash();
         int getHash(std::string word);
-        int quadraticProbe(int value, int attempts);
         int linearProbe(int value, int attempts);
         void wordInsert(std::string word, int linenum, int filepath);
         void insertUniqueWords(int linenum, int filepath, std::string line);
 
         //helper functions
-        void getFileNames(std::vector<std::string> &paths, DirNode *root, std::string path);
-        std::string stripNonAlphaNum(std::string input);
+        void getFileNames(std::vector<std::string> &paths, DirNode *root, 
+                          std::string path);
         bool isAlphaNum(char c);
-        void indexFiles(std::string directory);
         std::string toLower(std::string word);
         void open_or_die(std::ifstream &stream, std::string fileName);
         void abort(std::string errorMessage);
-
+        int probeCheck(std::string word);
+        void insensPrint(int value, std::ofstream &outstream);
+        void sensPrint(int value, std::string word, std::ofstream &outstream);
 
 };
 

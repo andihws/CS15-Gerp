@@ -15,33 +15,24 @@
 using namespace std;
 
 /*
- * name: 
- * purpose: 
- * arguments: 
- * returns:
- * effects: 
+ * name: GerpIndexer
+ * purpose: serves as the constructor
+ * arguments: none
+ * returns: none
+ * effects: sets initial size of hash table
  */
 GerpIndexer::GerpIndexer() {
-    hashTable.resize(prime[primeIndex]);
+    hashTable.resize(1013);
 }
 
 /*
- * name: 
- * purpose: 
- * arguments: 
- * returns:
- * effects: 
+ * name: ~GerpIndexer
+ * purpose: deconstructor
+ * arguments: none
+ * returns: none
+ * effects: frees used memory
  */
 GerpIndexer::~GerpIndexer() {}
-
-
-/*
- * name: 
- * purpose: 
- * arguments: 
- * returns:
- * effects: 
- */
 
 /*
  * name: indexFiles
@@ -62,7 +53,7 @@ void GerpIndexer::indexFiles(string directory) {
         vector<string> lineholder;
         files.push_back(lineholder);
 
-        while (getline(instream, line)) {
+        while(getline(instream, line)) {
             //add to files vector 
             files[i].push_back(line);
 
@@ -94,6 +85,7 @@ void GerpIndexer::insertUniqueWords(int linenum, int filepath, string line) {
     string theWord;
     stringstream ss(line);
 
+    //interate through each word
     while(ss >> theWord) {
         theWord = stripNonAlphaNum(theWord);
         if(theWord.length() > 0) {
@@ -168,8 +160,8 @@ bool GerpIndexer::isAlphaNum(char c) {
 
 /*
  * name: stripNonAlphaNum
- * purpose: Remove non-alphanumeric characters from the beginning and end of a
- *          string
+ * purpose: Remove non-alphanumeric characters from the beginning and end of
+ *          a string
  * arguments: String to be stripped
  * returns: A stripped string
  * effects: N/A
@@ -178,7 +170,7 @@ string GerpIndexer::stripNonAlphaNum(string input) {
     int begin = 0;
     int end = 0;
 
-    while (not isAlphaNum(input[begin]) && begin < int(input.length())) 
+    while (not isAlphaNum(input[begin]) and begin < int(input.length())) 
         begin++;
 
     input = input.erase(0, begin);
@@ -194,23 +186,6 @@ string GerpIndexer::stripNonAlphaNum(string input) {
 
     return input;
 }
-
-/*
- * name: traverseDirectory
- * purpose: Prints all paths of all files accessible from a specified directory
- * arguments: A string representing the root directory
- * returns: N/A
- * effects: Prints out the paths
-//  */
-// void traverseDirectory(string directory) {
-//     vector<string> paths;
-//     FSTree fileTree = FSTree(directory);
-//     DirNode *root = fileTree.getRoot();
-//     if (not root->isEmpty())
-//         getFileNames(paths, root, "");
-//     for (int i = 0; i < int(paths.size()); i++) 
-//         cout << paths[i] << endl;
-// }   
 
 /*
  * name: getFileNames
@@ -257,43 +232,18 @@ void GerpIndexer::makeFileTree(string directory) {
  * effects: increases the size of the hash table, allocates more space on the
  *          for the hash table
  */
-// void GerpIndexer::rehash() {
-//     //check if load balance is greater than 0.72
-//     if (float(numElements)/float(hashTable.capacity()) > 0.72) {
-//         cout << "going to rehash" << endl;
-
-//         //create a temp hash table
-//         //my question is: is the size for the hash too big??? lets go to office hours and ask
-//         vector<vector<WordData>> tempTable = hashTable;
-//         primeIndex++;
-
-//         //make the new hash table with the new size
-//         vector<vector<WordData>> newTable;
-//         newTable.resize(prime[primeIndex]);
-
-//         //add the old hash table elements to the new hash table
-//         hashTable = newTable;
-//         for (size_t i = 0; i < tempTable.size(); i++) {
-//             if (not tempTable[i].empty()) {
-//                 string theWord = toLower(tempTable[i][0].word);
-//                 int index = getHash(theWord);
-//                 hashTable[index] = tempTable[i];
-//             }
-//         }
-//     }
-// }
-
 void GerpIndexer::rehash() {
-    if(float(numElements) / float(hashTable.capacity()) > 0.7) {
+    if(float(numElements) / float(hashTable.capacity()) > 0.72) {
         
-        size_t newCapacity = (hashTable.size() + 2) * 2;
+        size_t newCapacity = (hashTable.size() + 2) * 4;
         vector<vector<WordData>> newHash;
         newHash.resize(newCapacity);
 
         //maybe risky becasue i am just copying the whole vector over
         for(size_t i = 0; i < hashTable.size(); i++) {
             if(not hashTable[i].empty()) {
-                size_t newIndex = hash(toLower(hashTable[i][0].word)) % newCapacity;
+                size_t newIndex =
+                    hash(toLower(hashTable[i][0].word)) % newCapacity;
                 newHash[newIndex] = hashTable[i];
             }            
         }
@@ -330,18 +280,6 @@ int GerpIndexer::getHash(string word) {
 }
 
 /*
- * name: quadraticProbe
- * purpose: to deal with collisions in the hashtable
- * arguments: an int value for the words hash value and the number of 
- *            rehashing attempts
- * returns: the new hash value/ index for the hash table
- * effects: none
- */
-int GerpIndexer::quadraticProbe(int value, int attempts) {
-    return (value + attempts * attempts) % hashTable.capacity();
-}
-
-/*
  * name: linearProbe
  * purpose: to deal with collisions in the hashtable
  * arguments: an int value for the words hash value and the number of 
@@ -354,114 +292,173 @@ int GerpIndexer::linearProbe(int value, int attempts) {
 }
 
 /*
- * name:      abort(string errorMessage)
- * purpose:   to send an error message to the user and the program
- * arguments: string errorMessage
- * returns:   technically void, but returns a cerr error message if the file
- *            doesn't open correctly.
- * effects:   ends the program
- */
-void GerpIndexer::abort(std::string errorMessage){
-    cerr << errorMessage << endl;
-    exit(EXIT_FAILURE);
-}
-
-/*
- * name:      open_or_die(streamtype &stream, string fileName)
+ * name:      open_or_die
  * purpose:   to check if the file opens correctly 
- * arguments: streamtype object, string filename
- * returns:   technically void, but returns a cerr error message if the file
+ * arguments: ifstream object, string filename
+ * returns:   technically void, but returns an error message if the file
  *            doesn't open correctly.
  * effects:   ends the program if the file doesn't open correctly
  */
-void GerpIndexer::open_or_die(ifstream &stream, std::string fileName){
+void GerpIndexer::open_or_die(ifstream &stream, std::string fileName) {
     stream.open(fileName);
     if(not stream.is_open()){
-        abort("Error: could not open file " + fileName);
+        cout << "Could not build index, reason:\n" <<
+            "Directory "<< fileName << " not found: could not build tree";
+            exit(EXIT_FAILURE);
     }
 }
 
-
-
-int main() {
-
-    GerpIndexer gerp;
-
-    // gerp.makeFileTree("tinyData");
-
-    // for(size_t i = 0; i < gerp.filepaths.size(); i++){
-    //     cout << gerp.filepaths[i] << endl;
-    // }
-
-    // cout << gerp.hashTable.capacity() << endl;
-
-//    gerp.indexFiles("largeGutenberg");
-   gerp.indexFiles("medium");
-
-    int value = gerp.getHash("a");
-
-    
-    // cout << "size array " << gerp.hashTable.size() << endl;
-    // cout << "size path  " << gerp.filepaths.size() << endl;
-
-    // for(size_t i = 0; i < gerp.hashTable[value].size(); i++ ){
-    //     cout << gerp.hashTable[value][i].word << endl;
-    // }
-
-    //test by running insensitive search on demo 
-    //then run this with one word
-
-    // cout << "first" << gerp.hashTable[value][0].word  << "." << endl;
-
-    // cout << gerp.files[gerp.hashTable[value][3].filePath][gerp.hashTable[value][3].lineNum] << endl;
-    
-
-    //basically insensitive search
-    for(size_t i = 0; i < gerp.hashTable[value].size(); i++){
-        int filenum = gerp.hashTable[value][i].filePath;
-        int line = gerp.hashTable[value][i].lineNum + 1;
+/*
+ * name: insensPrint
+ * purpose: to print the lines in the hash table by case insensitive search
+ * arguments: a value to be the hash table index
+ * returns: technically void, but prints out all the lines in the hashtable
+ *          with a matching hash
+ * effects: none
+ */
+void GerpIndexer::insensPrint(int value, ofstream &outstream) {
+    //check line before, if same file and line num, dont print, else print
+    for(size_t i = 0; i < hashTable[value].size(); i++){
+        int filenum = hashTable[value][i].filePath;
+        int line = hashTable[value][i].lineNum + 1;
         if(i != 0) {
-            int filenum2 = gerp.hashTable[value][i - 1].filePath;
-            int line2 = gerp.hashTable[value][i -1].lineNum + 1;
-            if(filenum2 != filenum && line != line2 ){
-                cout << gerp.filepaths[filenum] << ":" << line << ": " << gerp.files[filenum][line - 1] << endl;
-            } else if(line == line2 && filenum != filenum2) {
-                cout << gerp.filepaths[filenum] << ":" << line << ": " << gerp.files[filenum][line - 1] << endl;
+            int filenum2 = hashTable[value][i - 1].filePath;
+            int line2 = hashTable[value][i -1].lineNum + 1;
+            if(filenum2 != filenum and line != line2 ){
+                outstream << filepaths[filenum] << ":" << line << 
+                            ": " << files[filenum][line - 1] << endl;
+            } else if(line == line2 and filenum != filenum2) {
+                outstream << filepaths[filenum] << ":" << line << 
+                        ": " << files[filenum][line - 1] << endl;
 
-            } else if(line != line2 && filenum == filenum2) {
-                cout << gerp.filepaths[filenum] << ":" << line << ": " << gerp.files[filenum][line - 1] << endl;
+            } else if(line != line2 and filenum == filenum2) {
+                outstream << filepaths[filenum] << ":" << line << 
+                            ": " << files[filenum][line - 1] << endl;
 
-            } else if(line != line2 && filenum != filenum2){
-                cout << gerp.filepaths[filenum] << ":" << line << ": " << gerp.files[filenum][line - 1] << endl;
+            } else if(line != line2 and filenum != filenum2){
+                outstream << filepaths[filenum] << ":" << line << 
+                            ": " << files[filenum][line - 1] << endl;
+            }
+        } else {
+            outstream << filepaths[filenum] << ":" << line << 
+                        ": " << files[filenum][line - 1] << endl;
+        }
+    }
+}
+
+/*
+ * name: sensPrint
+ * purpose: to print the lines in the hash table by case sensitive search
+ * arguments: a value to be the hash table index
+ * returns: technically void, but prints out all the lines in the hashtable
+ *          with a matching hash
+ * effects: none
+ */
+void GerpIndexer::sensPrint(int value, string word, ofstream &outstream) {
+    for(size_t i = 0; i < hashTable[value].size(); i++){
+        //the word is the correct version
+        if(word == hashTable[value][i].word) {
+            int line = hashTable[value][i].lineNum + 1;
+            int filenum = hashTable[value][i].filePath;  
+            if(i == 0) {
+                outstream << filepaths[filenum] << ":" << line << 
+                            ": " << files[filenum][line - 1] << endl;
+            }
+            if(i != 0) {
+                //the word before is not the same thing on the same line
+                if(hashTable[value][i-1].word != word) {
+                    outstream << filepaths[filenum] << ":" << line << 
+                              ": " << files[filenum][line - 1] << endl;
+                //the word is the same
+                } else if(hashTable[value][i-1].word == word) {
+                    int linenum2 = hashTable[value][i - 1].lineNum + 1;
+                    int filenum2 = hashTable[value][i - 1].filePath;
+                    //if the linenum isnt the same print
+                    if(linenum2 != line) {
+                        outstream << filepaths[filenum] << ":" << line << 
+                                  ": " << files[filenum][line - 1] << endl;
+                    //if the file num is the same print
+                    } else if (filenum != filenum2) {
+                        outstream << filepaths[filenum] << ":" << line << 
+                                  ": " << files[filenum][line - 1] << endl;
+                    }
+                }
+            } 
+        }
+    }
+}
+
+/*
+ * name: probeCheck
+ * purpose: to check if the index of a word was probed
+ * arguments: a string word to be searched for in the hash table
+ *            and checked if linear probing was applied
+ * returns: none
+ * effects: none
+ */
+int GerpIndexer::probeCheck(string word) {
+    //get the index 
+    int value = getHash(toLower(word));
+    //check if the word exists 
+    if(hashTable[value].empty()) {
+        return -1;
+    }
+    //check if the hash value was probed
+    if(toLower(hashTable[value][0].word) != toLower(word)){
+        int attempts = 1;
+        bool found = false;
+        size_t newVal = 0;
+        while(not found) {
+            newVal = linearProbe(value, attempts);
+            attempts++;
+            if(newVal >= hashTable.capacity()) {
+                return -1;
+            }
+            if(hashTable[newVal].empty()) {
+                return -1;
+            }
+            if(toLower(hashTable[newVal][0].word) == toLower(word)) {
+                return newVal;                   
             }
         }
-
-        if(i == 0){
-                cout << gerp.filepaths[filenum] << ":" << line << ": " << gerp.files[filenum][line - 1] << endl;
-        }    
-    }
-
-    // for(size_t i = 0; i < gerp.hashTable[value].size(); i++){
-    //     cout << gerp.filepaths[gerp.hashTable[value][i].filePath] << endl;
-    // }
-  
-
-    // for(size_t i = 0; i < gerp.files.size(); i++){
-    //     cout << gerp.filepaths[i] << endl;
-    //     cout << endl;
-    //     for(size_t j = 0; j < gerp.files[i].size(); j++){
-    //         cout << gerp.files[i][j] << endl;
-    //     }
-    // }
+    } 
+    return value;
 }
 
-
-
-//testing w unit tests idea
 /*
-1. make chekcing the size of the filepaths array with given values a unit test
-2. 
+ * name: insensSearch
+ * purpose: to print the lines in the hash table by case insensitive search
+ * arguments: a string word to be searched for in the hash table
+ * returns: none
+ * effects: none
+ */
+void GerpIndexer::insensSearch(string word, ofstream &outstream) {
+    int value = probeCheck(word);
 
+    //check if it exists
+    if(value != -1) {
+      insensPrint(value, outstream);  
+    } else {
+        outstream << word << " Not Found." << endl;
+    }
+    
+}
 
-*/
+/*
+ * name: sensSearch
+ * purpose: to print the lines in the hash table by case sensitive search
+ * arguments: a string word to be searched for in the hash table
+ * returns: none
+ * effects: none
+ */
+void GerpIndexer::sensSearch(string word, ofstream &outstream) {
+    int value = probeCheck(word);
 
+    //check if the word exists
+    if(value != -1) {
+      sensPrint(value, word, outstream); 
+    } else {
+        outstream << 
+        word << " Not Found. Try with @insensitive or @i." << endl;
+    }
+}

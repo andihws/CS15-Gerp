@@ -5,5 +5,147 @@
 * Authors: Allison Zhang (yzhang80) and Baydan Hussen (bhusse01)
 *********************************************************/
 
-Program Purpose:
----------------
+B Purpose:
+    The purpose of this program is to search word for every instance of 
+    a given word in a given directory. Users are allowed to search for
+    words with and without regard to case. The result of the search are
+    stored in a file. 
+
+
+C Acknowledgements: 
+    -cplusplus.com, TAs, slides
+
+
+D Files and description
+    1. main.cpp: creates a Gerp instance and runs the command loop
+    2. GerpIndexer.cpp: contains the implementation of the GerpIndexer class
+                        creates the hashtable and functions to search it
+    3. GerpIndexer.h: contains the class definition of GerpIndexer class.
+                      interface for the GerpIndexer class.
+    4. Gerp.cpp: contains the implementation of the Gerp class.
+                 creates the query loop.
+    5. Gerp.h: contains the class definition of Gerp class.
+               interface for the Gerp class.
+    6. unit_tests.h: contains the unit tests for phases one and two
+    7. Makefile: Creates a new executable to run the compilation rules
+    8. README: Written component of project
+    9. FSTree.h: interface for FSTrree
+    10. DirNode.h: interface for DirNode class
+    11. additional testing files: 
+        - test.sh: runs and diffs our implementation against the reference
+                   for all of the 'proj-gerp-sample-execution' queries
+        - filetest.txt: a file that uses the @f command multiple times
+                        to check that the output files are properly opened
+                        and closed
+        - notStripped.txt: testing file with query words that contain non-
+                            alpha numerical characters
+        - commandLoopTest.txt: tests that the query loop works properly in
+                          edge case sitautions such as any @ command mixed
+                               in with non-alpha numeric characters
+
+
+E How to compile and run your program:
+    1. use make to compile for Gerp and unit_tests for proccessing
+    2. use ./gerp to run for phase two. phase one use
+       unit_tests.
+
+
+F Architectural overview:
+
+The FSTree class provides the ability to build a hierarchial tree to represent
+a directory. The DirNode class represents a directory node. It stores
+information about the files and subdirectories. The FStree classs builds
+its tree with the DirNode class. These classes allow for the formation
+of a directory into a tree with accessible file paths.
+
+The GerpIndexer file is responsible for storing information about the words
+contained in a directory. It uses the FSTree class to create the hierarchial 
+structure with a given directory. It then uses the FSTree structure to iterate
+through each DirNode instance/file and subdirectory and insert words into 
+a hashTable. This file also contains the basic printing aspect of the 
+sensitive and insensitve search queries, since we want to encapsulate 
+the hashTable, so the user doesnt have direct access to the hashTable.
+
+The main file is responsible for executing the program. It sends the 
+directory and output file to the Gerp class. The Gerp class is responsible
+for managing the command loop and faciliting the correct queries. 
+It uses the GerpIndexer class to index the files and create the hashTable
+and the file and query information provided by main and the user to execute 
+queries with GerpIndexer's pre-exisitng search and print functions. 
+ 
+
+
+G Data structures and algorithms:
+ 
+There were various data structures used throughout the program, but
+the main data structure used to index and search the contents of files in our
+gerp implementation was a hash table (built in GerpIndexer). 
+The program required the efficient insertion and quick searching of the 
+contents of a file. Hash tables have an o(1) complexity for both insertion
+and search. Additionally, in a situation where we don't know the initial
+size of the file, a hash tables is advantageous because they allow for dynamic
+re-sizing. Another reason we used the hash table for this program is because
+we were given time and space constraints. If hash tables are implemented
+effectively, memory utilization can be low and runtime can be fast. However.
+some disadvantages of hash tables are collisions between two elements.
+
+The underlying structure for our hash table was a vector of vector structs.
+The structs contained information about each word. This information was 
+its line number, file number, and the word itself. Each inner vector
+represents a bucket/slot in the hash table.
+
+Some other data strucutures used were the u-nary tree for the 
+FSTree/file/directory tree and 2-D array to store the contents of 
+the directory.
+
+For our algorithms, we used got the hash of each word with the
+hash function provided by CS15 modded by the capacity of the hash table.
+We used linear probing to solve the problem of the hash table collisions.
+Linear probing is relatively space efficent and cache efficent, and 
+usually does not have a slow performance. Moreover, since elements 
+are stored contiguously, sequential iteration through the table is simple 
+and does not require traversing separate data structures like other 
+methods to deal with collisions. A disadvtange of linear
+probing is primary clustering. However, even though rehashing doesn't directly
+solve that problem, it makes it a little better. To rehash, we expanded the
+hash tables capacity when it's load balance was over 0.72.
+
+
+H Testing:
+
+For phase one, we used the unit_test functionality to test our code.
+We tested the stripNonAlphaNum functions with various cases such as
+non-alpha numerical characters at the front, back, and middle, no
+non-alpha numerical characters, only non-alpha numerical characters,
+and only one letter in a mix of non-alpha numerical characters. We
+tested the traverse directory fuction by making sure that all
+of the possible file paths print. Since we were given the number
+of files in each path, we used that to make sure each file path
+was printed
+
+For phase two, we used unit tests to check that the hash and probing functions
+are working properly. We mainly used diff tests to test the completed gerp
+implementation. Before diff testing our final implementation, we used the 
+'gerp_perf' command to ensure the time and space of our implementation was
+within the constraints provided. 
+
+The first round of diff tests were done using the
+'proj-gerp-sample-execution' files. This is featured in the test.sh file
+listed above. We tested our implementation against the reference 
+implementation for all three queries on the small, medium, and large
+Gutenberg files. We made sure that there was no output when our program
+was diffed against the reference.
+
+The second round of diff tests were with different edge cases we thought of.
+The first being running the @f command multiple times to check that the 
+output files are properly opened and closed, and the outstream is redirecting
+data to the correct file. This was featureed in the 'filetest.txt' file.
+Our next test was testing that the commandloop worked when non-alpha 
+numerical characters were passed in, which was featured in the 
+'notStripped.txt' file. After, we testing that the commands for the query
+loop ran correctly when there were @i @insensitive @f and @q mixed in with
+numerous non-alphanumerical characters. Finally, we compiled some random test
+input files to ensure the program works in random circumstances.
+
+
+I. Time: 60 hours
